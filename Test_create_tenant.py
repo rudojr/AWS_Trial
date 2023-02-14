@@ -24,14 +24,14 @@ for i in range(1,9):
     checkbox = driver.find_element("xpath","/html/body/div[2]/div/div/div[2]/div/div/div/div[2]/div/div[1]/div[2]/div/div[2]/div/div/div[%s]/div/label" %i)
     checkbox.click()
 
-driver.save_screenshot("Screen_Home.png")
 btnNext = driver.find_element("xpath","//*[text()='Next']")
 btnNext.click()
-time.sleep(3)
+time.sleep(2)
 
 name = datetime.now().strftime("%d%m%y%H%M")
 mail = name + '@yopmail.com'
 pw = "Hoilamgi123@@"
+new_pass = pw + '@'
 
 def register():
     hoTen = driver.find_element("id","Fullname")
@@ -70,11 +70,10 @@ def register():
     # 
     WebDriverWait(driver,15).until(EC.element_to_be_clickable((By.XPATH,"//a[text()='LogIn CoDX']")))
     loginCODX = driver.find_element(By.XPATH, "//a[text()='LogIn CoDX']")
-    driver.save_screenshot("Screen_LoginCODX.png")
+    driver.save_screenshot("register.png")
     # 
     site_create = loginCODX.get_attribute("href")
-    print(site_create)
-    
+        
     with open('data.txt', 'w') as f:
         f.writelines(site_create)    
         f.writelines("\n")
@@ -85,24 +84,23 @@ def register():
         f.close()
         
     driver.get(site_create)
+    WebDriverWait(driver,15).until(EC.element_to_be_clickable((By.XPATH,"/html/body/app-auth/app-login/codx-login/div/div/div/div/div/div[1]/div/div[1]/div[2]/form/div[4]/button")))
     user = driver.find_element("xpath","//input[@placeholder='Nhập tài khoản hoặc email']")
     user.send_keys(mail)
     passw2 = driver.find_element("xpath","//input[@placeholder='Mật khẩu']")
     passw2.send_keys(pw)
-    passw2.submit()
-    time.sleep(5)
-    driver.save_screenshot("Scree_SiteRegister.png")
+    btnDangNhap = driver.find_element("xpath","/html/body/app-auth/app-login/codx-login/div/div/div/div/div/div[1]/div/div[1]/div[2]/form/div[4]/button")
+    btnDangNhap.click()
+    time.sleep(2)
+    driver.save_screenshot("home page.png")
   
 def changePass():
-    new_pass = pw + '@'
-    time.sleep(3)
     avt = driver.find_element("xpath","/html/body/lib-layout-portal/div[3]/div/div/codx-header/div/div[3]/div/codx-user-inner/div/button/codx-img/div/div")
     avt.click()
     time.sleep(1)
     changePassLbl = driver.find_element("xpath","//span[@data-name='lblChangePass']")
     changePassLbl.click()
-    WebDriverWait(driver,15).until(EC.element_to_be_clickable((By.ID,"btn-signin")))
-    driver.save_screenshot("Screen_ChangePass.png")
+    time.sleep(1)
     # 
     user = driver.find_element("xpath","//input[@placeholder='Nhập tài khoản hoặc email']")
     user.send_keys(mail)
@@ -110,13 +108,41 @@ def changePass():
     old_pw.send_keys(pw)
     new_pw = driver.find_element("xpath","//input[@placeholder='Mật khẩu mới']")
     new_pw.send_keys(new_pass)
-    confirm_pw = driver.find_element("xpath","//input[@placeholder='Mật khẩu mới']")
+    confirm_pw = driver.find_element("xpath","//input[@placeholder='Xác nhận mật khẩu']")
     confirm_pw.send_keys(new_pass)
-    
+    driver.save_screenshot("Change pass.png")
+    btnDangNhap = driver.find_element("id","btn-signin")
+    btnDangNhap.click()
+    time.sleep(1)
+    driver.close()
+
+def login_after_change_pass():
+    chrome_option = Options()   
+    chrome_option.add_experimental_option('excludeSwitches', ['enable-logging'])
+        # chrome_option.add_argument("--headless")
+    driver = webdriver.Chrome(chrome_options = chrome_option ,executable_path="C:\\Users\\hdthien\\Downloads\\chromedriver_win32\\chromedriver.exe")
+    driver.maximize_window()
+    driver.implicitly_wait(10)
+    # 
+    with open("data.txt") as f:
+        lines = f.read() 
+        url = lines.split('\n', 1)[0]
+    driver.get(url)
+    # 
+    user = driver.find_element("xpath","//input[@placeholder='Nhập tài khoản hoặc email']")
+    user.send_keys(mail)
+    passw2 = driver.find_element("xpath","//input[@placeholder='Mật khẩu']")
+    passw2.send_keys(new_pass)
+    btnDangNhap = driver.find_element("xpath","/html/body/app-auth/app-login/codx-login/div/div/div/div/div/div[1]/div/div[1]/div[2]/form/div[4]/button")
+    btnDangNhap.click()
+    time.sleep(3)
+    driver.save_screenshot("After Change pass.png")
+       
 def main():
     register()
     time.sleep(2)
-    print("Register Done !!")
+    changePass()
+    login_after_change_pass()
     
 if __name__ == "__main__":
     main()
