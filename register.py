@@ -7,14 +7,18 @@ import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-chrome_option = Options()   
-chrome_option.add_experimental_option('excludeSwitches', ['enable-logging'])
-# chrome_option.add_argument("--headless")
-driver = webdriver.Chrome(chrome_options = chrome_option ,executable_path="C:\\Users\\hdthien\\Downloads\\chromedriver_win32\\chromedriver.exe")
-driver.maximize_window()
-driver.implicitly_wait(10)
-url = "https://register.codx.vn/Shopping?_=trial"
-driver.get(url)
+def setUp():
+    chrome_option = Options()   
+    chrome_option.add_experimental_option('excludeSwitches', ['enable-logging'])
+    # chrome_option.add_argument("--headless")
+    driver = webdriver.Chrome(chrome_options = chrome_option ,executable_path="C:\\Users\\hdthien\\Downloads\\chromedriver_win32\\chromedriver.exe")
+    driver.maximize_window()
+    driver.implicitly_wait(10)
+    url = "https://register.codx.vn/Shopping?_=trial"
+    driver.get(url)
+    return driver
+
+driver = setUp()
 
 for i in range(1,9):
     checkbox = driver.find_element("xpath","/html/body/div[2]/div/div/div[2]/div/div/div/div[2]/div/div[1]/div[2]/div/div[2]/div/div/div[%s]/div/label" %i)
@@ -23,17 +27,17 @@ for i in range(1,9):
 driver.save_screenshot("Screen_Home.png")
 btnNext = driver.find_element("xpath","//*[text()='Next']")
 btnNext.click()
-time.sleep(1)
+time.sleep(3)
 
 name = datetime.now().strftime("%d%m%y%H%M")
 mail = name + '@yopmail.com'
 pw = "Hoilamgi123@@"
 
 def register():
-    hoTen = driver.find_element("xpath","//input[@placeholder='Nhập họ tên người đăng ký']")
+    hoTen = driver.find_element("id","Fullname")
     hoTen.send_keys(name)
     # 
-    email = driver.find_element("xpath","//input[@type='email']")
+    email = driver.find_element("id","Email")
     email.send_keys(mail)
     # 
     passw = driver.find_element("id","Password")
@@ -48,6 +52,9 @@ def register():
     companyPhone = driver.find_element("id","CompanyPhone")
     companyPhone.send_keys(name)
     # 
+    companyWeb = driver.find_element("id","TenantID")
+    companyWeb.send_keys(name)
+    # 
     companySize = Select(driver.find_element("id","CompanySize"))
     companySize.select_by_value("2")
     # 
@@ -58,21 +65,31 @@ def register():
     agreeTerms.click()
     # 
     btnDangKy = driver.find_element("xpath","//button[@type='submit']")
+    time.sleep(3)
     btnDangKy.click()
     # 
-    btnLoginCODX = WebDriverWait(driver,15).until(EC.element_to_be_clickable((By.XPATH,"//a[text()='LogIn CoDX']")))
+    WebDriverWait(driver,15).until(EC.element_to_be_clickable((By.XPATH,"//a[text()='LogIn CoDX']")))
     loginCODX = driver.find_element(By.XPATH, "//a[text()='LogIn CoDX']")
     driver.save_screenshot("Screen_LoginCODX.png")
     # 
     site_create = loginCODX.get_attribute("href")
     print(site_create)
     
+    with open('data.txt', 'w') as f:
+        f.writelines(site_create)    
+        f.writelines("\n")
+        f.writelines(mail)
+        f.writelines("\n")
+        f.writelines(pw)
+        f.writelines("\n")
+        f.close()
+        
     driver.get(site_create)
     user = driver.find_element("xpath","//input[@placeholder='Nhập tài khoản hoặc email']")
     user.send_keys(mail)
     passw2 = driver.find_element("xpath","//input[@placeholder='Mật khẩu']")
     passw2.send_keys(pw)
-    driver.find_element("xpath","//button[@type='submit']").click()
+    passw2.submit()
     time.sleep(5)
     driver.save_screenshot("Scree_SiteRegister.png")
   
@@ -99,7 +116,7 @@ def changePass():
 def main():
     register()
     time.sleep(2)
-    print("Register Done !!")      
+    print("Register Done !!")
     
-if __name__ == "_main_":
+if __name__ == "__main__":
     main()
